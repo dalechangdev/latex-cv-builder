@@ -1,0 +1,1 @@
+import{aV as f,K as e,aT as t}from"./DF_Zawxt.js";function c(n){throw new Error("https://svelte.dev/e/lifecycle_outside_component")}function u(n){e===null&&c(),f(()=>{const o=t(n);if(typeof o=="function")return o})}function r(n){e===null&&c(),u(()=>()=>t(n))}export{u as a,r as o};

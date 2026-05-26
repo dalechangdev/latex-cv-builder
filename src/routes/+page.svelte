@@ -80,6 +80,13 @@
       a.download = 'resume.pdf';
       a.click();
       URL.revokeObjectURL(url);
+
+      fetch('/api/documents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source }),
+      }).catch(() => {});
+
       status = { ok: true, message: 'PDF downloaded' };
     } catch {
       status = { ok: false, message: 'Network error — is the server running?' };

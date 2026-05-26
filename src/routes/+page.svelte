@@ -81,10 +81,11 @@
       a.click();
       URL.revokeObjectURL(url);
 
+      const templateName = templates.find((t) => t.id === selectedTemplate)?.name ?? 'resume';
       fetch('/api/documents', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ source }),
+        body: JSON.stringify({ name: templateName, source }),
       }).catch(() => {});
 
       status = { ok: true, message: 'PDF downloaded' };

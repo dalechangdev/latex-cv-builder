@@ -14,13 +14,13 @@
     "@sveltejs/kit": "^2.15.0",
     "latex.js": "^0.12.6",
     "monaco-editor": "^0.52.0",
+    "playwright": "^1.60.0",
     "svelte": "^5.0.0"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^5.0.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
-    "playwright": "^1.60.0",
     "svelte-check": "^4.0.0",
     "tailwindcss": "^4",
     "typescript": "^5",

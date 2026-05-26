@@ -1,12 +1,7 @@
-import { exec } from 'child_process';
-import { mkdtemp, writeFile, readFile, rm } from 'fs/promises';
-import { join } from 'path';
-import { tmpdir } from 'os';
-import { promisify } from 'util';
+import { chromium } from 'playwright';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-
-const execAsync = promisify(exec);
+import { latexToHtml, buildHtmlDocument } from '$lib/latexToHtml';
 
 export const POST: RequestHandler = async ({ request }) => {
   let source: unknown;
@@ -20,33 +15,19 @@ export const POST: RequestHandler = async ({ request }) => {
     return json({ error: 'source is required' }, { status: 400 });
   }
 
+  let browser;
   try {
-    await execAsync('which pdflatex');
-  } catch {
-    return json(
-      {
-        error:
-          'pdflatex is not installed on this server. ' +
-          'Install TeX Live (e.g. `brew install --cask mactex` on macOS) to enable PDF export.',
-      },
-      { status: 503 }
-    );
-  }
+    const html = buildHtmlDocument(latexToHtml(source));
 
-  let workDir: string | null = null;
-  try {
-    workDir = await mkdtemp(join(tmpdir(), 'resume-'));
-    const texFile = join(workDir, 'resume.tex');
-    const pdfFile = join(workDir, 'resume.pdf');
+    browser = await chromium.launch();
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'load' });
 
-    await writeFile(texFile, source, 'utf8');
-
-    // Run pdflatex twice so cross-references resolve
-    const cmd = `pdflatex -interaction=nonstopmode -output-directory="${workDir}" "${texFile}"`;
-    await execAsync(cmd);
-    await execAsync(cmd);
-
-    const pdfBytes = await readFile(pdfFile);
+    const pdfBytes = await page.pdf({
+      format: 'Letter',
+      margin: { top: '0', right: '0', bottom: '0', left: '0' },
+      printBackground: true,
+    });
 
     return new Response(pdfBytes, {
       status: 200,
@@ -57,12 +38,8 @@ export const POST: RequestHandler = async ({ request }) => {
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    const match = msg.match(/l\.\d+.*|! .+/g);
-    const detail = match ? match.slice(0, 5).join('\n') : msg;
-    return json({ error: `Compilation failed:\n${detail}` }, { status: 422 });
+    return json({ error: `PDF generation failed:\n${msg}` }, { status: 422 });
   } finally {
-    if (workDir) {
-      await rm(workDir, { recursive: true, force: true }).catch(() => {});
-    }
+    await browser?.close();
   }
 };

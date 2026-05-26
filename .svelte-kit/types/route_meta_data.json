@@ -2,5 +2,11 @@
 	"/": [],
 	"/api/compile": [
 		"src/routes/api/compile/+server.ts"
+	],
+	"/api/documents/[...path]": [
+		"src/routes/api/documents/[...path]/+server.ts"
+	],
+	"/api/snippets/[...path]": [
+		"src/routes/api/snippets/[...path]/+server.ts"
 	]
 }

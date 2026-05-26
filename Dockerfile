@@ -1,4 +1,4 @@
-FROM node:22-alpine AS base
+FROM node:22-slim AS base
 
 FROM base AS deps
 WORKDIR /app
@@ -15,11 +15,18 @@ FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 sveltekit
+# Install production deps (includes playwright, now a runtime dependency)
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
 
-# adapter-node bundles everything into build/
-COPY --from=builder --chown=sveltekit:nodejs /app/build ./
+# Install Chromium and its system libraries (must run as root)
+RUN npx playwright install --with-deps chromium
+
+# Copy built app and lock down ownership
+COPY --from=builder /app/build ./
+RUN groupadd --system --gid 1001 nodejs \
+ && useradd --system --uid 1001 --gid 1001 sveltekit \
+ && chown -R sveltekit:nodejs /app
 
 USER sveltekit
 EXPOSE 3000

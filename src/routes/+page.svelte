@@ -3,7 +3,7 @@
   import type { Component } from 'svelte';
   import Toolbar from '$lib/Toolbar.svelte';
   import Toast from '$lib/Toast.svelte';
-  import { addToast } from '$lib/toast.svelte';
+  import { addToast } from '$lib/toasts.svelte';
   import { defaultTemplate, templates } from '$lib/templates';
 
   type EditorProps = { value: string; onChange: (v: string) => void };

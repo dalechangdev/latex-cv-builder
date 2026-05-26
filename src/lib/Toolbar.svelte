@@ -16,9 +16,9 @@
 
   let menuOpen = $state(false);
   let fileName = $state('');
-  let menuEl: HTMLDivElement | undefined;
-  let triggerEl: HTMLButtonElement | undefined;
-  let inputEl: HTMLInputElement | undefined;
+  let menuEl = $state<HTMLDivElement | undefined>(undefined);
+  let triggerEl = $state<HTMLButtonElement | undefined>(undefined);
+  let inputEl = $state<HTMLInputElement | undefined>(undefined);
 
   $effect(() => {
     if (!menuOpen) return;

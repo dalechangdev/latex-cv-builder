@@ -2,6 +2,8 @@
   import { onMount } from 'svelte';
   import type { Component } from 'svelte';
   import Toolbar from '$lib/Toolbar.svelte';
+  import Toast from '$lib/Toast.svelte';
+  import { addToast } from '$lib/toast.svelte';
   import { defaultTemplate, templates } from '$lib/templates';
 
   type EditorProps = { value: string; onChange: (v: string) => void };
@@ -86,7 +88,15 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: templateName, source }),
-      }).catch(() => {});
+      })
+        .then((r) => {
+          if (r.ok) {
+            addToast('Template saved successfully', 'success');
+          } else {
+            addToast('Template could not be saved', 'warning');
+          }
+        })
+        .catch(() => addToast('Template could not be saved', 'warning'));
 
       status = { ok: true, message: 'PDF downloaded' };
     } catch {
@@ -96,6 +106,8 @@
     }
   }
 </script>
+
+<Toast />
 
 <div class="flex h-screen flex-col overflow-hidden bg-zinc-950">
   <Toolbar

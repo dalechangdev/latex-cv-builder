@@ -59,7 +59,7 @@
     }
   }
 
-  async function handleCompilePdf() {
+  async function handleCompilePdf(fileName: string) {
     isCompiling = true;
     status = null;
     try {
@@ -79,7 +79,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'resume.pdf';
+      a.download = fileName.endsWith('.pdf') ? fileName : `${fileName}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
 

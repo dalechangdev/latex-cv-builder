@@ -20,6 +20,8 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
 # Install Chromium and its system libraries (must run as root)
+# Set a fixed path so the sveltekit user finds the same browsers at runtime
+ENV PLAYWRIGHT_BROWSERS_PATH=/app/ms-playwright
 RUN npx playwright install --with-deps chromium
 
 # Copy built app and lock down ownership

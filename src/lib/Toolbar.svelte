@@ -1,15 +1,18 @@
 <script lang="ts">
   import { templates } from '$lib/templates';
 
+  interface DocumentStub { id: string; name: string; }
+
   interface Props {
     selectedTemplate: string;
+    documents: DocumentStub[];
     onTemplateChange: (id: string) => void;
     onCompilePdf: (fileName: string) => void;
     isCompiling: boolean;
     status: { ok: boolean; message: string } | null;
   }
 
-  let { selectedTemplate, onTemplateChange, onCompilePdf, isCompiling, status }: Props = $props();
+  let { selectedTemplate, documents, onTemplateChange, onCompilePdf, isCompiling, status }: Props = $props();
 
   let menuOpen = $state(false);
   let fileName = $state('');
@@ -69,9 +72,22 @@
       onchange={(e) => onTemplateChange((e.currentTarget as HTMLSelectElement).value)}
       class="rounded border border-zinc-600 bg-zinc-800 px-2 py-1 text-xs text-zinc-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
     >
-      {#each templates as t (t.id)}
-        <option value={t.id} selected={t.id === selectedTemplate}>{t.name}</option>
-      {/each}
+      {#if documents.length > 0}
+        <optgroup label="Templates">
+          {#each templates as t (t.id)}
+            <option value={t.id} selected={t.id === selectedTemplate}>{t.name}</option>
+          {/each}
+        </optgroup>
+        <optgroup label="Saved">
+          {#each documents as d (d.id)}
+            <option value={d.id} selected={d.id === selectedTemplate}>{d.name}</option>
+          {/each}
+        </optgroup>
+      {:else}
+        {#each templates as t (t.id)}
+          <option value={t.id} selected={t.id === selectedTemplate}>{t.name}</option>
+        {/each}
+      {/if}
     </select>
 
     <div class="relative">

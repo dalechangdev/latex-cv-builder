@@ -11,12 +11,14 @@
     source: string;
     onStatusChange?: (s: { ok: boolean; message: string }) => void;
   };
+  type DocumentStub = { id: string; name: string };
 
   let source = $state(defaultTemplate.source);
   let selectedTemplate = $state(defaultTemplate.id);
   let status = $state<{ ok: boolean; message: string } | null>(null);
   let isCompiling = $state(false);
   let splitPct = $state(48);
+  let documents = $state<DocumentStub[]>([]);
 
   let EditorComponent = $state<Component<EditorProps> | null>(null);
   let PreviewComponent = $state<Component<PreviewProps> | null>(null);
@@ -24,12 +26,17 @@
   let containerEl: HTMLDivElement;
 
   onMount(async () => {
-    const [editorMod, previewMod] = await Promise.all([
+    const [editorMod, previewMod, docsRes] = await Promise.all([
       import('$lib/Editor.svelte'),
       import('$lib/Preview.svelte'),
+      fetch('/api/documents'),
     ]);
     EditorComponent = editorMod.default;
     PreviewComponent = previewMod.default;
+    if (docsRes.ok) {
+      const data = await docsRes.json();
+      documents = data.map((d: DocumentStub) => ({ id: d.id, name: d.name }));
+    }
   });
 
   function handleDividerMouseDown(e: MouseEvent) {
@@ -50,11 +57,19 @@
     document.addEventListener('mouseup', onUp);
   }
 
-  function handleTemplateChange(id: string) {
+  async function handleTemplateChange(id: string) {
     const tpl = templates.find((t) => t.id === id);
     if (tpl) {
       selectedTemplate = id;
       source = tpl.source;
+      status = null;
+      return;
+    }
+    const res = await fetch(`/api/documents/${id}`);
+    if (res.ok) {
+      const doc = await res.json();
+      selectedTemplate = id;
+      source = doc.source;
       status = null;
     }
   }
@@ -111,6 +126,7 @@
 <div class="flex h-screen flex-col overflow-hidden bg-zinc-950">
   <Toolbar
     {selectedTemplate}
+    {documents}
     onTemplateChange={handleTemplateChange}
     onCompilePdf={handleCompilePdf}
     {isCompiling}

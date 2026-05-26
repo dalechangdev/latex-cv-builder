@@ -83,11 +83,10 @@
       a.click();
       URL.revokeObjectURL(url);
 
-      const templateName = templates.find((t) => t.id === selectedTemplate)?.name ?? 'resume';
       fetch('/api/documents', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: templateName, source }),
+        body: JSON.stringify({ name: fileName, source }),
       })
         .then((r) => {
           if (r.ok) {
